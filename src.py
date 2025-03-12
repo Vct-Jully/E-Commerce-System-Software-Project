@@ -1,265 +1,258 @@
-# Lista de administradores cadastrados diretamente no código
-admins = [
-    {"user": "admin", "password": "admin123"},
-    {"user": "gestor", "password": "gestor123"}
-]
+from abc import ABC, abstractmethod
 
+# Classe Abstrata
+class Usuario(ABC):
+    def __init__(self, usuario, senha):
+        self.usuario = usuario
+        self.senha = senha
+
+    def autenticar(self, usuario, senha):
+        return self.usuario == usuario and self.senha == senha
+
+    @abstractmethod
+    def menu(self):
+        pass  # Método obrigatório a ser implementado
+
+
+# Classe Administrador (Herança de Usuario)
+class Administrador(Usuario):
+    def menu(self):
+        while True:
+            print("\n=== Menu de Administração ===")
+            print("1 - Adicionar Produto")
+            print("2 - Editar Produto")
+            print("3 - Remover Produto")
+            print("4 - Logout")
+            opcao = input("Escolha uma opção: ")
+
+            if opcao == "1":
+                nome = input("Digite o nome do produto: ")
+                preco = float(input("Digite o preço do produto: R$"))
+                products.append({"nome": nome, "preco": preco})
+                print(f"Produto {nome} adicionado!")
+
+            elif opcao == "2":
+                show_products()
+                index = int(input("Digite o número do produto a ser editado: ")) - 1
+                if 0 <= index < len(products):
+                    nome = input("Digite o novo nome do produto: ")
+                    preco = float(input("Digite o novo preço do produto: R$"))
+                    products[index] = {"nome": nome, "preco": preco}
+                    print("Produto atualizado!")
+
+            elif opcao == "3":
+                show_products()
+                index = int(input("Digite o número do produto a ser removido: ")) - 1
+                if 0 <= index < len(products):
+                    removed_product = products.pop(index)
+                    print(f"Produto {removed_product['nome']} removido!")
+
+            elif opcao == "4":
+                print("Saindo do menu de administração...")
+                break
+
+            else:
+                print("Opção inválida!")
+
+
+# Classe Cliente (Herança de Usuario)
+class Cliente(Usuario):
+    def __init__(self, usuario, senha):
+        super().__init__(usuario, senha)
+        self.carrinho = []
+
+    def menu(self):
+        while True:
+            print("\n=== Menu do Cliente ===")
+            print("1 - Ver Produtos")
+            print("2 - Comprar ou Adicionar ao Carrinho")
+            print("3 - Gerenciar Carrinho")
+            print("4 - Logout")
+            opcao = input("Escolha uma opção: ")
+
+            if opcao == "1":
+                show_products()
+            elif opcao == "2":
+                comprar_ou_adicionar(self.carrinho)
+            elif opcao == "3":
+                gerenciar_carrinho(self.carrinho)
+            elif opcao == "4":
+                print("Logout realizado.")
+                break
+            else:
+                print("Opção inválida!")
+
+
+# Lista de usuários e produtos
+admins = [Administrador("admin", "admin123"), Administrador("gestor", "gestor123")]
 users = []
-
-# Variáveis para usuário comum
-user = None
-password = None
-logged = False  # Controle de login
-is_admin = False  # Determina se o usuário logado é administrador
-
-# Lista de produtos
 products = [
     {"nome": "Notebook", "preco": 3500},
     {"nome": "Smartphone", "preco": 2000},
     {"nome": "Tênis", "preco": 300}
 ]
 
-# Carrinho de compras
-cart = []
 
+# Funções auxiliares
 def show_products():
-    """Exibe a lista de produtos disponíveis com um índice"""
     print("\nLista de Produtos Disponíveis:")
     for i, p in enumerate(products, start=1):
         print(f"{i} - Nome: {p['nome']}, Preço: R${p['preco']}")
 
-def buy_or_add_to_cart():
-    """Permite ao usuário escolher um produto para comprar ou adicionar ao carrinho"""
+
+def selecionar_metodo_pagamento():
+    print("\nEscolha o método de pagamento:")
+    print("1 - Pix")
+    print("2 - Boleto")
+    print("3 - Cartão de Crédito")
+    opcao = input("Opção: ")
+    if opcao == "1":
+        return "Pix"
+    elif opcao == "2":
+        return "Boleto"
+    elif opcao == "3":
+        return "Cartão de Crédito"
+    else:
+        print("Opção inválida, tente novamente.")
+        return selecionar_metodo_pagamento()
+
+
+def comprar_ou_adicionar(cart):
     show_products()
+    choice = int(input("Digite o número do produto desejado: ")) - 1
+    if 0 <= choice < len(products):
+        print("1 - Comprar agora")
+        print("2 - Adicionar ao carrinho")
+        opcao = input("Escolha uma opção: ")
 
-    try:
-        choice = int(input("\nDigite o número do produto desejado: ")) - 1
-        
-        if 0 <= choice < len(products):
-            print("\n1 - Adicionar ao carrinho")
-            print("2 - Comprar agora")
-            action = input("Escolha uma opção: ")
-
-            if action == "1":
-                cart.append(products[choice])
-                print(f"\n{products[choice]['nome']} foi adicionado ao carrinho!\n")
-            elif action == "2":
-                print(f"\nVocê comprou: {products[choice]['nome']} por R${products[choice]['preco']}!\n")
-            else:
-                print("\nOpção inválida! Escolha 1 ou 2.\n")
-
+        if opcao == "1":
+            metodo = selecionar_metodo_pagamento()
+            print(f"Compra realizada via {metodo}! Produto: {products[choice]['nome']} - R${products[choice]['preco']}")
+        elif opcao == "2":
+            cart.append(products[choice])
+            print(f"{products[choice]['nome']} adicionado ao carrinho!")
         else:
-            print("\nOpção inválida! Escolha um número da lista.\n")
-    
-    except ValueError:
-        print("\nEntrada inválida! Digite um número.\n")
+            print("Opção inválida.")
+    else:
+        print("Produto inválido.")
 
-def view_cart():
-    """Exibe os itens no carrinho e permite ações"""
+
+def gerenciar_carrinho(cart):
+    while True:
+        print("\n=== Gerenciar Carrinho ===")
+        print("1 - Ver Carrinho")
+        print("2 - Remover Item")
+        print("3 - Remover Todos os Itens")
+        print("4 - Comprar Item Específico")
+        print("5 - Comprar Todos os Itens")
+        print("6 - Voltar")
+        opcao = input("Escolha uma opção: ")
+
+        if opcao == "1":
+            view_cart(cart)
+        elif opcao == "2":
+            view_cart(cart)
+            remover_item(cart)
+        elif opcao == "3":
+            cart.clear()
+            print("Todos os itens foram removidos do carrinho.")
+        elif opcao == "4":
+            view_cart(cart)
+            comprar_item_especifico(cart)
+        elif opcao == "5":
+            comprar_todos_os_itens(cart)
+        elif opcao == "6":
+            break
+        else:
+            print("Opção inválida!")
+
+
+def view_cart(cart):
     if not cart:
-        print("\nSeu carrinho está vazio!\n")
+        print("Seu carrinho está vazio!")
+    else:
+        print("\n=== Carrinho ===")
+        for i, item in enumerate(cart, start=1):
+            print(f"{i} - {item['nome']} | R${item['preco']}")
+
+
+def remover_item(cart):
+    if not cart:
+        print("Carrinho vazio.")
         return
 
-    print("\n=== Carrinho de Compras ===")
-    total = 0
-    for i, item in enumerate(cart, start=1):
-        print(f"{i} - {item['nome']} | R${item['preco']}")
-        total += item['preco']
-    
-    print(f"\nTotal da compra: R${total}")
+    index = int(input("Digite o número do item a ser removido: ")) - 1
+    if 0 <= index < len(cart):
+        removed_item = cart.pop(index)
+        print(f"Item {removed_item['nome']} removido do carrinho.")
+    else:
+        print("Número inválido.")
 
-    while True:
-        print("\n1 - Comprar um item")
-        print("2 - Comprar todos os itens")
-        print("3 - Remover um item")
-        print("4 - Esvaziar carrinho")
-        print("5 - Voltar ao menu")
 
-        action = input("Escolha uma opção: ")
+def comprar_item_especifico(cart):
+    if not cart:
+        print("Carrinho vazio.")
+        return
 
-        if action == "1":
-            try:
-                item_index = int(input("\nDigite o número do item que deseja comprar: ")) - 1
-                if 0 <= item_index < len(cart):
-                    print("1 - Cartão de crédito")
-                    print("2 - Pix")
-                    print("3 - Boleto bancário")
+    index = int(input("Digite o número do item a ser comprado: ")) - 1
+    if 0 <= index < len(cart):
+        item = cart.pop(index)
+        metodo = selecionar_metodo_pagamento()
+        print(f"Compra realizada via {metodo}! Produto: {item['nome']} - R${item['preco']}")
+    else:
+        print("Número inválido.")
 
-                    payment_method = int(input("Selecione a forma de pagamento: "))
 
-                    if payment_method not in [1, 2, 3]:
-                        print("\nForma de pagamento inválida")
-                        continue
+def comprar_todos_os_itens(cart):
+    if not cart:
+        print("Carrinho vazio.")
+        return
 
-                    item = cart.pop(item_index)
-                    print(f"\nVocê comprou: {item['nome']} por R${item['preco']} utilizando {'Cartão' if payment_method == 1 else 'Pix' if payment_method == 2 else 'Boleto'}!\n")
-                else:
-                    print("\nOpção inválida!\n")
-            except ValueError:
-                print("\nEntrada inválida! Digite um número.\n")
+    metodo = selecionar_metodo_pagamento()
+    total = sum(item["preco"] for item in cart)
+    cart.clear()
+    print(f"Compra total de R${total:.2f} realizada via {metodo}!")
 
-        elif action == "2":
-            if cart:
-                print("\nCompra finalizada! Você comprou:")
-                for item in cart:
-                    print(f"- {item['nome']} por R${item['preco']}")
-                cart.clear()
-                print("\nObrigado por comprar conosco!\n")
-            else:
-                print("\nSeu carrinho está vazio!\n")
-            break
 
-        elif action == "3":
-            try:
-                item_index = int(input("\nDigite o número do item que deseja remover: ")) - 1
-                if 0 <= item_index < len(cart):
-                    removed_item = cart.pop(item_index)
-                    print(f"\n{removed_item['nome']} foi removido do carrinho.\n")
-                else:
-                    print("\nOpção inválida!\n")
-            except ValueError:
-                print("\nEntrada inválida! Digite um número.\n")
+def login():
+    usuario = input("Usuário: ")
+    senha = input("Senha: ")
 
-        elif action == "4":
-            cart.clear()
-            print("\nTodos os itens foram removidos do carrinho.\n")
-            break
+    for admin in admins:
+        if admin.autenticar(usuario, senha):
+            print(f"Login bem-sucedido como Administrador: {admin.usuario}")
+            admin.menu()
+            return
 
-        elif action == "5":
-            break
+    for user in users:
+        if user.autenticar(usuario, senha):
+            print(f"Login bem-sucedido! Usuário: {user.usuario}")
+            user.menu()
+            return
 
-        else:
-            print("\nOpção inválida! Escolha entre 1 e 5.\n")
+    print("Usuário ou senha incorretos.")
 
-def admin_menu():
-    """Menu de administração para gerenciar produtos"""
-    while True:
-        print("\n=== Menu de Administração ===")
-        print("1 - Adicionar Produto")
-        print("2 - Editar Produto")
-        print("3 - Remover Produto")
-        print("4 - Voltar ao menu do usuário")
 
-        action = input("Escolha uma opção: ")
+def cadastrar_usuario():
+    usuario = input("Novo usuário: ")
+    senha = input("Senha: ")
+    users.append(Cliente(usuario, senha))
+    print("Usuário cadastrado!")
 
-        if action == "1":
-            nome = input("\nDigite o nome do produto: ")
-            preco = float(input("Digite o preço do produto: R$"))
-            products.append({"nome": nome, "preco": preco})
-            print(f"\nProduto {nome} adicionado ao inventário!\n")
-
-        elif action == "2":
-            try:
-                show_products()
-                index = int(input("\nDigite o número do produto a ser editado: ")) - 1
-                if 0 <= index < len(products):
-                    nome = input("Digite o novo nome do produto: ")
-                    preco = float(input("Digite o novo preço do produto: R$"))
-                    products[index] = {"nome": nome, "preco": preco}
-                    print(f"\nProduto {nome} foi atualizado!\n")
-                else:
-                    print("\nProduto não encontrado!\n")
-            except ValueError:
-                print("\nEntrada inválida!\n")
-
-        elif action == "3":
-            try:
-                show_products()
-                index = int(input("\nDigite o número do produto a ser removido: ")) - 1
-                if 0 <= index < len(products):
-                    removed_product = products.pop(index)
-                    print(f"\nProduto {removed_product['nome']} foi removido!\n")
-                else:
-                    print("\nProduto não encontrado!\n")
-            except ValueError:
-                print("\nEntrada inválida!\n")
-
-        elif action == "4":
-            break
-
-        else:
-            print("\nOpção inválida! Escolha entre 1 e 4.\n")
 
 while True:
     print("\n=== Menu ===")
     print("1 - Fazer Login")
     print("2 - Cadastrar Usuário")
     print("3 - Sair")
+    opcao = input("Escolha uma opção: ")
 
-    option = input("Escolha uma opção: ")
-
-    if option == "1":
-        user_input = input("Digite seu usuário: ")
-        password_input = input("Digite sua senha: ")
-
-        # Verifica se o usuário é um admin
-        is_admin = any(admin["user"] == user_input and admin["password"] == password_input for admin in admins)
-
-        if is_admin or (user_input == user and password_input == password):
-            print("Login bem-sucedido!")
-            logged = True
-
-            while logged:
-                print("\n=== Menu do Usuário ===")
-                print("1 - Ver Produtos")
-                print("2 - Comprar ou Adicionar ao Carrinho")
-                print("3 - Ver Carrinho")
-                if is_admin:
-                    print("4 - Acessar Menu de Administração")
-                print("5 - Logout")
-
-                option_user = input("Escolha uma opção: ")
-
-                if option_user == "1":
-                    show_products()
-                elif option_user == "2":
-                    buy_or_add_to_cart()
-                elif option_user == "3":
-                    view_cart()
-                elif option_user == "4" and is_admin:
-                    admin_menu()
-                elif option_user == "5":
-                    print("Você saiu da conta.")
-                    logged = False
-                else:
-                    print("Opção inválida! Escolha entre 1 e 5.")
-
-        elif user_input == user and password_input == password:
-            print("Login realizado com sucesso!")
-            logged = True
-
-            while logged:
-                print("\n=== Menu do Usuário ===")
-                print("1 - Ver Produtos")
-                print("2 - Comprar ou Adicionar ao Carrinho")
-                print("3 - Ver Carrinho")
-                print("4 - Logout")
-
-                option_user = input("Selecione uma opção: ")
-
-                if option_user == "1":
-                    show_products()
-                elif option_user == "2":
-                    buy_or_add_to_cart()
-                elif option_user == "3":
-                    view_cart()
-                elif option_user == "4":
-                    print("Você saiu da conta.")
-                    logged = False
-                else:
-                    print("Opção inválida! Escolha entre 1 e 4.")
-
-        else:
-            print("Usuário ou senha incorretos.")
-
-    elif option == "2":
-        user = input("Cadastre um nome de usuário: ")
-        password = input("Cadastre uma senha: ")
-        print("Usuário cadastrado com sucesso!\n")
-
-    elif option == "3":
+    if opcao == "1":
+        login()
+    elif opcao == "2":
+        cadastrar_usuario()
+    elif opcao == "3":
         print("Saindo...")
         break
-
     else:
-        print("Opção inválida! Escolha 1, 2 ou 3.")
+        print("Opção inválida!")
