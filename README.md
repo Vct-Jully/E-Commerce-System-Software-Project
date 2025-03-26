@@ -1,7 +1,7 @@
 # E-Commerce-System---Software-Project
 
 ## Descrição
-Este projeto é um sistema de e-commerce desenvolvido em Python utilizando Programação Orientada a Objetos (POO) e modularização. Este sistema permite que administradores adicionem, editem e removam produtos, enquanto clientes podem visualizar, adicionar ao carrinho e comprar produtos. O sistema utiliza um mecanismo de autenticação simples e um menu interativo baseado em terminal.
+Este projeto é um sistema de e-commerce desenvolvido em Python utilizando Programação Orientada a Objetos (POO). Este sistema permite que administradores adicionem, editem e removam produtos, enquanto clientes podem visualizar, adicionar ao carrinho e comprar produtos. O sistema utiliza um mecanismo de autenticação simples e um menu interativo baseado em terminal.
 
 
 ## Funções não implementadas
